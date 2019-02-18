@@ -1,99 +1,159 @@
 angular.module('reg')
-  .factory('UserService', [
-  '$http',
-  'Session',
-  function($http, Session){
+    .factory('UserService', [
+        '$http',
+        'Session',
+        function ($http, Session) {
 
-    var users = '/api/users';
-    var base = users + '/';
+            var users = '/api/users';
+            var base = users + '/';
 
-    return {
+            return {
 
-      // ----------------------
-      // Basic Actions
-      // ----------------------
-      getCurrentUser: function(){
-        return $http.get(base + Session.getUserId());
-      },
+                // ----------------------
+                // Basic Actions
+                // ----------------------
+                getCurrentUser: function () {
+                    return $http.get(base + Session.getUserId());
+                },
 
-      get: function(id){
-        return $http.get(base + id);
-      },
+                get: function (id) {
+                    return $http.get(base + id);
+                },
 
-      getAll: function(){
-        return $http.get(base);
-      },
+                getAll: function () {
+                    return $http.get(base);
+                },
 
-      getPage: function(page, size, text){
-        return $http.get(users + '?' + $.param(
-          {
-            text: text,
-            page: page ? page : 0,
-            size: size ? size : 50
-          })
-        );
-      },
+                getAllCompaniesSelected: function(){
+                    return $http.get(base + 'sponsorsSelected');
+                },
+                getAllAdmitted: function(){
+                    return $http.get(base + 'allAdmitted');
+                },
+                getAllConfirmed: function(){
+                    return $http.get(base + 'allConfirmed');
+                },
+                getAllUnpaid: function(){
+                    return $http.get(base+ 'allUnpaid');
+                },
 
-      updateProfile: function(id, profile){
-        return $http.put(base + id + '/profile', {
-          profile: profile
-        });
-      },
+                getAllFinal: function(){
+                    return $http.get(base+ 'allFinal');
+                },
+                getCSV: function (type, partial, adminID) {
+                    // console.log('getCSV');
+                    console.log(type);
+                    adminID = Session.getUserId();
+                    console.log(adminID);
+                    return $http.get(base + 'exportcsv?type=' + type + '&adminID=' + adminID).success(function (data, status, headers) {
+                        headers = headers();
+                        var filename = headers['x-filename'];
+                        var contentType = headers['content-type'];
 
-      updateConfirmation: function(id, confirmation){
-        return $http.put(base + id + '/confirm', {
-          confirmation: confirmation
-        });
-      },
+                        var linkElement = document.createElement('a');
+                        try {
+                            var blob = new Blob([data], {type: contentType});
+                            var url = window.URL.createObjectURL(blob);
+                            linkElement.setAttribute('href', url);
+                            linkElement.setAttribute("download", filename);
+                            var clickEvent = new MouseEvent("click", {
+                                "view": window,
+                                "bubbles": true,
+                                "cancelable": false
+                            });
+                            linkElement.dispatchEvent(clickEvent);
+                        } catch (ex) {
+                            console.log(ex);
+                        }
+                    }).error(function (data) {
+                        console.log(data);
+                    });
+                },
 
-      declineAdmission: function(id){
-        return $http.post(base + id + '/decline');
-      },
 
-      // ------------------------
-      // Team
-      // ------------------------
-      joinOrCreateTeam: function(code){
-        return $http.put(base + Session.getUserId() + '/team', {
-          code: code
-        });
-      },
+                getAdmittedCSV: function () {
+                    console.log("getAdmittedCSV");
+                    this.getCSV("admitted", true);
+                },
 
-      leaveTeam: function(){
-        return $http.delete(base + Session.getUserId() + '/team');
-      },
+                getConfirmedCSV: function () {
+                    console.log("getConfirmedCSV");
+                    this.getCSV("confirmed");
+                },
 
-      getMyTeammates: function(){
-        return $http.get(base + Session.getUserId() + '/team');
-      },
+                getPage: function (page, size, text, statusFilters) {
+                    return $http.get(users + '?' + $.param(
+                        {
+                            text: text,
+                            page: page ? page : 0,
+                            size: size ? size : 100,
+                            statusFilters: statusFilters ? statusFilters : {}
+                        })
+                    );
+                },
 
-      // -------------------------
-      // Admin Only
-      // -------------------------
+                updateProfile: function (id, profile) {
+                    return $http.put(base + id + '/profile', {
+                        profile: profile
+                    });
+                },
 
-      getStats: function(){
-        return $http.get(base + 'stats');
-      },
+                updateConfirmation: function (id, confirmation) {
+                    return $http.put(base + id + '/confirm', {
+                        confirmation: confirmation
+                    });
+                },
 
-      admitUser: function(id){
-        return $http.post(base + id + '/admit');
-      },
+                declineAdmission: function (id) {
+                    return $http.post(base + id + '/decline');
+                },
 
-      checkIn: function(id){
-        return $http.post(base + id + '/checkin');
-      },
+                // -------------------------
+                // Admin Only
+                // -------------------------
 
-      checkOut: function(id){
-        return $http.post(base + id + '/checkout');
-      },
+                getStats: function () {
+                    return $http.get(base + 'stats');
+                },
 
-      makeAdmin: function(id){
-        return $http.post(base + id + '/makeadmin');
-      },
+                admitUser: function (id) {
+                    return $http.post(base + id + '/admit');
+                },
 
-      removeAdmin: function(id){
-        return $http.post(base + id + '/removeadmin');
-      },
-    };
-  }
-  ]);
+                checkIn: function (id) {
+                    return $http.post(base + id + '/checkin');
+                },
+
+                checkOut: function (id) {
+                    return $http.post(base + id + '/checkout');
+                },
+                makeAdmin: function (id) {
+                    return $http.post(base + id + '/makeadmin');
+                },
+                acceptPayment: function (id) {
+                    return $http.post(base + id + '/acceptpayment');
+                },
+                unacceptPayment: function (id) {
+                    return $http.post(base + id + '/unacceptpayment');
+                },
+                sendLaggerPaymentEmails: function () {
+                    return $http.post(base + 'sendlagpayemails');
+                },
+
+
+                removeAdmin: function (id) {
+                    return $http.post(base + id + '/removeadmin');
+                },
+
+                sendLaggerEmails: function () {
+                    return $http.post(base + 'sendlagemails');
+                },
+                sendAcceptEmails: function (email) {
+                    return $http.post(base + email + '/sendacceptemails');
+                },
+                sendPaymentEmails: function (email) {
+                    return $http.post(base + email + '/sendpaymentemails');
+                },
+            };
+        }
+    ]);
