@@ -1,5 +1,5 @@
 angular.module('reg')
-    .controller('ConfirmationCtrl', [
+    .controller('SponsorCtrl', [
         '$scope',
         '$rootScope',
         '$state',
@@ -20,8 +20,8 @@ angular.module('reg')
 
             $scope.fileName = user._id + "_" + user.profile.name.split(" ").join("_");
 
-
             function _updateUser(e) {
+                $scope.user.confirmation.sponsorSelected = true;
                 var confirmation = $scope.user.confirmation;
                 // Get the dietary restrictions as an array
                 var drs = [];
@@ -32,7 +32,7 @@ angular.module('reg')
                     .then(response => {
                         swal({
                             title: "Tamamlandı!",
-                            text: "Teyidini aldık!",
+                            text: "Firma tercihlerini aldık!",
                             type: "success",
                             confirmButtonColor: "#31517e"
 
@@ -50,21 +50,29 @@ angular.module('reg')
                 // Semantic-UI form validation
                 $('.ui.form').form({
                     fields: {
-                        signatureLiability: {
-                            identifier: 'signatureLiabilityWaiver',
+                        choice1: {
+                            identifier: 'choice1',
                             rules: [
                                 {
+                                    type: 'different[choice2]',
+                                    prompt: 'Lütfen tercihlerini farklı şirketlerden yap.'
+                                },
+                                {
                                     type: 'empty',
-                                    prompt: 'Lütfen okuduğunu doğrula.'
+                                    prompt: 'Lütfen tercihini yap.'
                                 }
                             ]
                         },
-                        receiptConfirmation: {
-                            identifier: 'receiptConfirmation',
+                        choice2: {
+                            identifier: 'choice2',
                             rules: [
                                 {
-                                    type: 'checked',
-                                    prompt: 'Lütfen yüklediğini/girdiğini doğrula.'
+                                    type: 'different[choice1]',
+                                    prompt: 'Lütfen tercihlerini farklı şirketlerden yap.'
+                                },
+                                {
+                                    type: 'empty',
+                                    prompt: 'Lütfen tercihini yap.'
                                 }
                             ]
                         },

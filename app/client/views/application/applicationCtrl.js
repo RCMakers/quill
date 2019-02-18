@@ -1,174 +1,207 @@
 angular.module('reg')
-  .controller('ApplicationCtrl', [
-    '$scope',
-    '$rootScope',
-    '$state',
-    '$http',
-    'currentUser',
-    'settings',
-    'Session',
-    'UserService',
-    function($scope, $rootScope, $state, $http, currentUser, Settings, Session, UserService){
+    .controller('ApplicationCtrl', [
+        '$scope',
+        '$rootScope',
+        '$state',
+        '$http',
+        '$window',
+        'currentUser',
+        'settings',
+        'Session',
+        'UserService',
+        function ($scope, $rootScope, $state, $http, $window, currentUser, Settings, Session, UserService) {
 
-      // Set up the user
-      $scope.user = currentUser.data;
 
-      // Is the student from MIT?
-      $scope.isMitStudent = $scope.user.email.split('@')[1] == 'mit.edu';
+            // Set up the user
+            $scope.user = currentUser.data;
 
-      // If so, default them to adult: true
-      if ($scope.isMitStudent){
-        $scope.user.profile.adult = true;
-      }
+            $scope.submitButtonDisabled = true;
 
-      // Populate the school dropdown
-      populateSchools();
-      _setupForm();
+            // Is the student from McGill?
+            $scope.isMcGillStudent = $scope.user.email.split('@')[1] == 'mail.mcgill.edu';
 
-      $scope.regIsClosed = Date.now() > Settings.data.timeClose;
-
-      /**
-       * TODO: JANK WARNING
-       */
-      function populateSchools(){
-        $http
-          .get('/assets/schools.json')
-          .then(function(res){
-            var schools = res.data;
-            var email = $scope.user.email.split('@')[1];
-
-            if (schools[email]){
-              $scope.user.profile.school = schools[email].school;
-              $scope.autoFilledSchool = true;
-            }
-          });
-
-        $http
-          .get('/assets/schools.csv')
-          .then(function(res){ 
-            $scope.schools = res.data.split('\n');
-            $scope.schools.push('Other');
-
-            var content = [];
-
-            for(i = 0; i < $scope.schools.length; i++) {                                          
-              $scope.schools[i] = $scope.schools[i].trim(); 
-              content.push({title: $scope.schools[i]})
+            // If so, default them to adult: true
+            if ($scope.isMcGillStudent) {
+                $scope.user.profile.adult = true;
             }
 
-            $('#school.ui.search')
-              .search({
-                source: content,
-                cache: true,     
-                onSelect: function(result, response) {                                    
-                  $scope.user.profile.school = result.title.trim();
-                }        
-              })             
-          });          
-      }
-
-      function _updateUser(e){
-        UserService
-          .updateProfile(Session.getUserId(), $scope.user.profile)
-          .success(function(data){
-            sweetAlert({
-              title: "Awesome!",
-              text: "Your application has been saved.",
-              type: "success",
-              confirmButtonColor: "#e76482"
-            }, function(){
-              $state.go('app.dashboard');
-            });
-          })
-          .error(function(res){
-            sweetAlert("Uh oh!", "Something went wrong.", "error");
-          });
-      }
-
-      function isMinor() {
-        return !$scope.user.profile.adult;
-      }
-
-      function minorsAreAllowed() {
-        return Settings.data.allowMinors;
-      }
-
-      function minorsValidation() {
-        // Are minors allowed to register?
-        if (isMinor() && !minorsAreAllowed()) {
-          return false;
-        }
-        return true;
-      }
-
-      function _setupForm(){
-        // Custom minors validation rule
-        $.fn.form.settings.rules.allowMinors = function (value) {
-          return minorsValidation();
-        };
-
-        // Semantic-UI form validation
-        $('.ui.form').form({
-          inline: true,
-          fields: {
-            name: {
-              identifier: 'name',
-              rules: [
-                {
-                  type: 'empty',
-                  prompt: 'Please enter your name.'
+            $scope.$watch('user', function (newValue, oldValue) {
+                if (newValue !== oldValue) {
+                    $scope.submitButtonDisabled = false;
                 }
-              ]
-            },
-            school: {
-              identifier: 'school',
-              rules: [
-                {
-                  type: 'empty',
-                  prompt: 'Please enter your school name.'
-                }
-              ]
-            },
-            year: {
-              identifier: 'year',
-              rules: [
-                {
-                  type: 'empty',
-                  prompt: 'Please select your graduation year.'
-                }
-              ]
-            },
-            gender: {
-              identifier: 'gender',
-              rules: [
-                {
-                  type: 'empty',
-                  prompt: 'Please select a gender.'
-                }
-              ]
-            },
-            adult: {
-              identifier: 'adult',
-              rules: [
-                {
-                  type: 'allowMinors',
-                  prompt: 'You must be an adult, or an MIT student.'
-                }
-              ]
+            }, true);
+
+            // Populate the school dropdown
+            _setupForm();
+
+            $scope.regIsClosed = Date.now() > Settings.data.timeClose;
+
+            /**
+             * TODO: JANK WARNING
+             */
+
+
+            function _updateUser(e) {
+                UserService
+                    .updateProfile(Session.getUserId(), $scope.user.profile)
+                    .then(response => {
+                        swal({
+                            title: "Tamamlandı!",
+                            text: "Başvurunu aldık!",
+                            type: "success",
+                            confirmButtonColor: "#31517e"
+
+                        }, function () {
+                            $state.go("app.dashboard");
+                            document.location.reload(true);
+
+                        });
+                    }, response => {
+                        swal("Hay Aksi!", "Bir şeyler yanlış gitti.", "error");
+                    });
             }
-          }
-        });
-      }
 
+            function checkvalue(val) {
+                if (val === "others")
+                    document.getElementById('ref').style.display = 'block';
+                else
+                    document.getElementById('ref').style.display = 'none';
+            }
 
+            function isMinor() {
+                return !$scope.user.profile.adult;
+            }
 
-      $scope.submitForm = function(){
-        if ($('.ui.form').form('is valid')){
-          _updateUser();
-        }
-        else{
-          sweetAlert("Uh oh!", "Please Fill The Required Fields", "error");
-        }
-      };
+            function minorsAreAllowed() {
+                return Settings.data.allowMinors;
+            }
 
-    }]);
+            function minorsValidation() {
+                // Are minors allowed to register?
+                if (isMinor() && !minorsAreAllowed()) {
+                    return false;
+                }
+                return true;
+            }
+
+            $scope.formatDate = function (date) {
+                if (!date) {
+                    return "Invalid Date";
+                }
+
+                // Hack for timezone
+                return moment(date).format('dddd, MMMM Do YYYY, h:mm a') +
+                    " " + date.toTimeString().split(' ')[2];
+            };
+
+            // Take a date and remove the seconds.
+            function cleanDate(date) {
+                return new Date(
+                    date.getFullYear(),
+                    date.getMonth(),
+                    date.getDate(),
+                    date.getHours(),
+                    date.getMinutes()
+                );
+            }
+
+            $scope.updateRegistrationTimes = function () {
+                // Clean the dates and turn them to ms.
+                var bday = cleanDate($scope.settings.timeOpen).getTime();
+
+                if (bday < 0 || bday === undefined) {
+                    return swal('Oops...', 'You need to enter valid times.', 'error');
+                }
+
+                SettingsService
+                    .updateRegistrationTimes(open, close)
+                    .success(function (settings) {
+                        updateSettings(settings);
+                    });
+            };
+
+            function _setupForm() {
+                // Custom minors validation rule
+                $.fn.form.settings.rules.allowMinors = function (value) {
+                    return minorsValidation();
+                };
+
+                // Semantic-UI form validation
+                $('.ui.form').form({
+                    inline: true,
+                    fields: {
+                        name: {
+                            identifier: 'name',
+                            rules: [
+                                {
+                                    type: 'empty',
+                                    prompt: 'Lütfen ismini gir.'
+                                }
+                            ]
+                        },
+                        school: {
+                            identifier: 'school',
+                            rules: [
+                                {
+                                    type: 'empty',
+                                    prompt: 'Lütfen okulunu gir.'
+                                }
+                            ]
+                        },
+                        bday: {
+                            identifier: 'bday',
+                            rules: [
+                                {
+                                    type: 'empty',
+                                    prompt: 'Lütfen doğum gününü gir.'
+                                }
+                            ]
+                        },
+                        phoneNumber: {
+                            identifier: 'phoneNumber',
+                            rules: [
+                                {
+                                    type: 'empty',
+                                    prompt: 'Lütfen cep telefonu numaranı gir.'
+                                }
+                            ]
+                        },
+                        bbqChoice: {
+                            identifier: 'bbqChoice',
+                            rules: [
+                                {
+                                    type: 'empty',
+                                    prompt: 'Lütfen tercihini seç.'
+                                }
+                            ]
+                        },
+                        openingChoice: {
+                            identifier: 'openingChoice',
+                            rules: [
+                                {
+                                    type: 'empty',
+                                    prompt: 'Lütfen tercihini seç.'
+                                }
+                            ]
+                        },
+                        veggie: {
+                            identifier: 'veggie',
+                            rules: [
+                                {
+                                    type: 'empty',
+                                    prompt: 'Lütfen tercihini seç.'
+                                }
+                            ]
+                        }
+                    }
+                });
+            }
+
+            $scope.submitForm = function () {
+                if ($('.ui.form').form('is valid')) {
+                    _updateUser();
+                } else {
+                    swal("Hay Aksi!", "Lütfen Formun Gerekli Olan Sorularını Doldur", "error", {confirmButtonColor: "#31517e",});
+                }
+            };
+        }]);
