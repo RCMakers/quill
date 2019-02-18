@@ -1,54 +1,70 @@
 #dashboard {
   .status {
     text-align: center;
+
     p {
       text-align: left;
     }
+
     .button {
       margin-top: 12px;
     }
+
     .header {
       font-size: 1.2em;
     }
+
     .state {
       text-align: center;
       padding: 12px 24px;
       margin-bottom: 1em;
-      color: white;
+      color: black;
       font-size: 1.3em;
       text-transform: uppercase;
 
-      &.unverified {
+      &.e-posta.doğrulanmamış {
         background: $status-unverified-color;
+        color: white;
+
       }
 
-      &.incomplete {
+      &.tamamlanmadı {
         background: $status-incomplete-color;
         color: black;
       }
 
-      &.submitted {
+      &.teslim.edildi {
         background: $status-submitted-color;
+        color: white;
+
       }
 
-      &.waitlist {
+      &.bekleme.listesinde {
         background: $status-waitlist-color;
+        color: white;
+
       }
 
-      &.admitted {
+      &.kabul.edildi {
         background: $status-admitted-color;
+        color: white;
+
       }
 
-      &.confirmed {
+      &.teyit.edildi {
         background: $status-confirmed-color;
+        color: white;
+
       }
 
-      &.checked.in {
+      &.okula.giriş.yapıldı {
         background: $status-checkedin-color;
       }
 
-      &.declined {
+      &.reddedildi {
         background: $status-declined-color;
+        color: white;
+
       }
     }
   }
@@ -59,6 +75,7 @@
 
   .description {
     margin-bottom: 24px;
+
     .markdown {
       text-align: left;
       margin-bottom: 24px;

@@ -1,6 +1,7 @@
 @import 'branding';
 @import 'custom';
-$font-body: 'Lato', 'Helvetica Neue', 'Helvetica', sans-serif;
+
+$font-body: 'Helvetica Neue', 'Helvetica', sans-serif;
 $font-header: 'Montserrat', 'Helvetica Neue', 'Helvetica', sans-serif;
 
 // Login screen variables
@@ -33,7 +34,7 @@ $brand-tertiary: $tertiary;
 
 @mixin transform($transforms) {
   -webkit-transform: $transforms;
-          transform: $transforms;
+  transform: $transforms;
 }
 
 @mixin transition-duration($duration) {
@@ -48,8 +49,9 @@ $brand-tertiary: $tertiary;
 @import 'dashboard';
 @import 'application';
 @import 'verify';
-@import 'team';
 @import 'admin';
+@import 'register';
+
 
 html,
 body {
@@ -60,7 +62,7 @@ body {
 
 body {
   margin: 0;
-  font-family: 'Lato', 'Helvetica Neue', 'Helvetica', sans-serif;
+  font-family: $font-body;
   font-weight: 300;
 
   > .container {
@@ -76,6 +78,10 @@ body {
   font-family: $font-body;
 }
 
+.sweet-alert button.confirm {
+  background-color: #31517e !important;
+}
+
 /**
  * Semantic-UI Overrides for squareishness
  */
@@ -83,28 +89,37 @@ body {
   border-radius: 0;
   box-shadow: none;
 }
+
 input {
   border-radius: 0 !important;
 }
+
 .ui.button {
   border-radius: 0;
+
   &.primary {
     background: $primary;
+
     &:hover {
       background: lighten($primary, 3%);
     }
+
     &:active {
       background: darken($primary, 3%);
     }
   }
+
   &.secondary {
     background: $secondary;
+
     &:hover {
       background: lighten($secondary, 3%);
     }
+
     &:active {
       background: darken($secondary, 3%);
     }
+
     &:focus {
       background: $secondary;
     }
@@ -120,7 +135,8 @@ fieldset {
   border: none;
 }
 
-.ui.search >.results {
+.ui.search > .results {
   width: 100%;
 }
+
 // @import 'animation';

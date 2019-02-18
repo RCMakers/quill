@@ -1,3 +1,9 @@
-// Branding overrides
-//
-// Copy variables from `_branding.scss` to this file to override default values.
+$primary: #305080;
+$secondary: #473899;
+$tertiary: #0046a8;
+
+/** ASSET URLS
+ * login-bg: image for login splash page
+ */
+
+$login-bg: url('https://registration.remixopolis.org/assets/images/bg.jpg');
